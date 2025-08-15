@@ -58,4 +58,5 @@ dependencies {
     // Dependencies with compatible versions from the BoM
     implementation(libs.google.firebase.storage)
     implementation(libs.google.firebase.firestore)
+    implementation(libs.firebase.database)
 }
