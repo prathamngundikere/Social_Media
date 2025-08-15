@@ -7,25 +7,26 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-class PhotoFeedAdapter(private val photos: List<String>) :
-    RecyclerView.Adapter<PhotoFeedAdapter.PhotoViewHolder>() {
+class PhotoAdapter(private val photoList: List<String>) :
+    RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
 
-    class PhotoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val imageView: ImageView = view.findViewById(R.id.photoItemImage)
+    class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val imageView: ImageView = itemView.findViewById(R.id.photoImageView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_photo_feed, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_photo_feed, parent, false)
         return PhotoViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         Glide.with(holder.imageView.context)
-            .load(photos[position])
+            .load(photoList[position])
             .centerCrop()
+            .placeholder(R.drawable.ic_photo)
             .into(holder.imageView)
     }
 
-    override fun getItemCount() = photos.size
+    override fun getItemCount() = photoList.size
 }
+

@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -13,35 +13,31 @@ import com.google.firebase.firestore.Query
 class PhotoFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: PhotoFeedAdapter
+    private lateinit var photoAdapter: PhotoAdapter
     private val photoList = mutableListOf<String>()
-    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_photos, container, false)
-    }
+        val view = inflater.inflate(R.layout.fragment_photos, container, false)
+        recyclerView = view.findViewById(R.id.photoRecyclerView)
+        recyclerView.layoutManager = GridLayoutManager(context, 2)
+        photoAdapter = PhotoAdapter(photoList)
+        recyclerView.adapter = photoAdapter
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        recyclerView = view.findViewById(R.id.photoFeedRecycler)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = PhotoFeedAdapter(photoList)
-        recyclerView.adapter = adapter
-
-        listenForPhotos()
-    }
-
-    private fun listenForPhotos() {
-        db.collection("photos")
+        FirebaseFirestore.getInstance().collection("photos")
             .orderBy("timestamp", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) return@addSnapshotListener
-                if (snapshot != null && !snapshot.isEmpty) {
+            .addSnapshotListener { value, _ ->
+                if (value != null) {
                     photoList.clear()
-                    photoList.addAll(snapshot.documents.mapNotNull { it.getString("url") })
-                    adapter.notifyDataSetChanged()
+                    for (doc in value) {
+                        photoList.add(doc.getString("url") ?: "")
+                    }
+                    photoAdapter.notifyDataSetChanged()
                 }
             }
+
+        return view
     }
 }
