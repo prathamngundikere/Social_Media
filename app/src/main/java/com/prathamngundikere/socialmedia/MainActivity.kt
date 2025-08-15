@@ -5,13 +5,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: MyAdapter
+    private lateinit var bottomNav: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,39 +22,35 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        recyclerView = findViewById(R.id.recyclerView)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
-        // Sample Data
-        val itemList = listOf(
-            MyItem("Title 1", "Subtitle 1"),
-            MyItem("Title 2", "Subtitle 2"),
-            MyItem("Title 3", "Subtitle 3"),
-            MyItem("Title 4", "Subtitle 4"),
-            MyItem("Title 5", "Subtitle 5"),
-            MyItem("Title 1", "Subtitle 1"),
-            MyItem("Title 2", "Subtitle 2"),
-            MyItem("Title 3", "Subtitle 3"),
-            MyItem("Title 4", "Subtitle 4"),
-            MyItem("Title 1", "Subtitle 1"),
-            MyItem("Title 2", "Subtitle 2"),
-            MyItem("Title 3", "Subtitle 3"),
-            MyItem("Title 4", "Subtitle 4"),
-            MyItem("Title 1", "Subtitle 1"),
-            MyItem("Title 2", "Subtitle 2"),
-            MyItem("Title 3", "Subtitle 3"),
-            MyItem("Title 4", "Subtitle 4"),
-            MyItem("Title 1", "Subtitle 1"),
-            MyItem("Title 2", "Subtitle 2"),
-            MyItem("Title 3", "Subtitle 3"),
-            MyItem("Title 4", "Subtitle 4"),
-            MyItem("Title 1", "Subtitle 1"),
-            MyItem("Title 2", "Subtitle 2"),
-            MyItem("Title 3", "Subtitle 3"),
-            MyItem("Title 4", "Subtitle 4")
-        )
+        bottomNav = findViewById(R.id.bottomNavigationView)
 
-        adapter = MyAdapter(itemList)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
+        // Default fragment
+        replaceFragment(PhotoFragment())
+
+        bottomNav.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.nav_photos -> replaceFragment(PhotoFragment())
+                R.id.nav_post -> replaceFragment(PostFragment())
+                R.id.nav_chat -> replaceFragment(ChatFragment())
+            }
+            true
+        }
     }
+
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
+    }
+
+    fun hideBottomNav() {
+        bottomNav.translationY = bottomNav.height.toFloat()
+    }
+
+    fun showBottomNav() {
+        bottomNav.translationY = 0f
+    }
+
 }
