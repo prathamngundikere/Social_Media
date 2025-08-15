@@ -7,29 +7,41 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class PhotoFragment : Fragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_photos, container, false)
-        val recycler = view.findViewById<RecyclerView>(R.id.photoRecycler)
 
-        // Sample list for UI
-        val items = List(50) { MyItem("Photo $it", "Subtitle $it") }
-        recycler.layoutManager = LinearLayoutManager(requireContext())
-        recycler.adapter = MyAdapter(items)
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: PhotoFeedAdapter
+    private val photoList = mutableListOf<String>()
+    private val db = FirebaseFirestore.getInstance()
 
-        // Hide/show bottom nav on scroll
-        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val activity = requireActivity() as MainActivity
-                if (dy > 0) {
-                    activity.hideBottomNav() // scrolling down
-                } else if (dy < 0) {
-                    activity.showBottomNav() // scrolling up
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_photos, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        recyclerView = view.findViewById(R.id.photoFeedRecycler)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        adapter = PhotoFeedAdapter(photoList)
+        recyclerView.adapter = adapter
+
+        listenForPhotos()
+    }
+
+    private fun listenForPhotos() {
+        db.collection("photos")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) return@addSnapshotListener
+                if (snapshot != null && !snapshot.isEmpty) {
+                    photoList.clear()
+                    photoList.addAll(snapshot.documents.mapNotNull { it.getString("url") })
+                    adapter.notifyDataSetChanged()
                 }
             }
-        })
-
-        return view
     }
 }

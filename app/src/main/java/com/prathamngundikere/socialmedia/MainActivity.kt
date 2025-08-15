@@ -46,11 +46,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun hideBottomNav() {
-        bottomNav.translationY = bottomNav.height.toFloat()
+        bottomNav.animate()
+            .translationY(bottomNav.height.toFloat())
+            .setDuration(50)
     }
 
     fun showBottomNav() {
-        bottomNav.translationY = 0f
+        bottomNav.animate()
+            .translationY(0f)
+            .setDuration(50)
     }
 
 }
